@@ -95,7 +95,7 @@ const FireStationSchema = new Schema<IFireStation>(
 
 // Geospatial index for finding nearest fire stations
 FireStationSchema.index({ 'location.coordinates': '2dsphere' });
-FireStationSchema.index({ stationCode: 1 });
+// Note: stationCode already has unique index from schema definition
 FireStationSchema.index({ isActive: 1 });
 FireStationSchema.index({ city: 1 });
 

@@ -94,7 +94,7 @@ const DeviceSchema = new Schema<IDevice>(
 );
 
 // Indexes for performance
-DeviceSchema.index({ deviceId: 1 });
+// Note: deviceId already has unique index from schema definition
 DeviceSchema.index({ companyId: 1 });
 DeviceSchema.index({ status: 1 });
 DeviceSchema.index({ lastSeenAt: 1 });

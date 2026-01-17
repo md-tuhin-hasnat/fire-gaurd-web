@@ -93,7 +93,7 @@ const TrafficPoliceSchema = new Schema<ITrafficPolice>(
 // Geospatial indexes for finding stations along route
 TrafficPoliceSchema.index({ 'location.coordinates': '2dsphere' });
 TrafficPoliceSchema.index({ 'jurisdiction.coordinates': '2dsphere' });
-TrafficPoliceSchema.index({ stationCode: 1 });
+// Note: stationCode already has unique index from schema definition
 TrafficPoliceSchema.index({ isActive: 1 });
 TrafficPoliceSchema.index({ city: 1 });
 

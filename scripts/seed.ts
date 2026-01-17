@@ -19,6 +19,9 @@ import Company from '../models/Company';
 import Device from '../models/Device';
 import FireStation from '../models/FireStation';
 import TrafficPolice from '../models/TrafficPolice';
+import SensorData from '../models/SensorData';
+import Alert from '../models/Alert';
+import DeviceWarning from '../models/DeviceWarning';
 
 /**
  * Generate a random device ID
@@ -87,6 +90,9 @@ async function seed() {
     await Device.deleteMany({});
     await FireStation.deleteMany({});
     await TrafficPolice.deleteMany({});
+    await SensorData.deleteMany({});
+    await Alert.deleteMany({});
+    await DeviceWarning.deleteMany({});
     console.log('✅ Existing data cleared\n');
 
     // 1. Create Super Admin
@@ -356,7 +362,27 @@ async function seed() {
     ]);
     console.log(`✅ Created ${fireStations.length} fire stations\n`);
 
-    // 5. Create 20 Traffic Police Stations
+    // 5. Create Fire Service User Accounts
+    console.log('👨‍🚒 Creating fire service users...');
+    const fireServiceUsers = [];
+    for (let i = 0; i < fireStations.length; i++) {
+      const station = fireStations[i];
+      const email = `${station.stationCode.toLowerCase()}@fireservice.gov.bd`;
+      const password = await bcrypt.hash('fire123', 10);
+      
+      const user = await User.create({
+        email,
+        password,
+        name: `${station.name} Officer`,
+        role: 'fire_service',
+        fireStationId: station._id,
+        isActive: true,
+      });
+      fireServiceUsers.push(user);
+    }
+    console.log(`✅ Created ${fireServiceUsers.length} fire service users\n`);
+
+    // 6. Create 20 Traffic Police Stations
     console.log('🚓 Creating traffic police stations...');
     const trafficPoliceStations = await TrafficPolice.insertMany([
       {
@@ -568,11 +594,17 @@ async function seed() {
     console.log(`   - Devices: ${deviceDocs.length}`);
     console.log(`   - Companies: ${companies.length}`);
     console.log(`   - Fire Stations: ${fireStations.length}`);
+    console.log(`   - Fire Service Users: ${fireServiceUsers.length}`);
     console.log(`   - Traffic Police: ${trafficPoliceStations.length}`);
     console.log('');
     console.log('🔐 Login Credentials:');
-    console.log('   Email: admin@fireguard.com');
-    console.log('   Password: admin123');
+    console.log('   Super Admin:');
+    console.log('     Email: admin@fireguard.com');
+    console.log('     Password: admin123');
+    console.log('');
+    console.log('   Fire Service (any station):');
+    console.log('     Email: fs-mir-01@fireservice.gov.bd (or any station code)');
+    console.log('     Password: fire123');
     console.log('');
     console.log('💡 Next Steps:');
     console.log('   1. Start the development server: npm run dev');

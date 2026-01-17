@@ -9,6 +9,7 @@ import FireStation from '@/models/FireStation';
 import Device from '@/models/Device';
 import Company from '@/models/Company';
 import { sendSMS } from './sms-service';
+import mongoose from 'mongoose';
 
 // Timeout configurations based on danger level
 const ALERT_TIMEOUTS = {
@@ -290,16 +291,22 @@ export async function acceptAlert(alertId: string, fireStationId: string) {
       throw new Error('Alert not found');
     }
 
-    if (alert.fireStationId?.toString() !== fireStationId) {
-      throw new Error('This alert is not assigned to your fire station');
+    // Check if this fire station is in the escalation history (current or previous)
+    const isInHistory = alert.escalationHistory.some(
+      (entry) => entry.fireStationId.toString() === fireStationId
+    );
+
+    if (!isInHistory) {
+      throw new Error('This alert was not assigned to your fire station');
     }
 
     if (alert.status !== 'pending') {
       throw new Error(`Alert is already ${alert.status}`);
     }
 
-    // Update alert status
+    // Update alert status and assign to accepting station
     alert.status = 'acknowledged';
+    alert.fireStationId = new mongoose.Types.ObjectId(fireStationId);
 
     // Update escalation history
     const currentEscalation = alert.escalationHistory.find(
